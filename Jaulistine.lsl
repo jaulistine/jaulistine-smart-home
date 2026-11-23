@@ -7,7 +7,7 @@
 // The HTML is a display surface; the LSL script owns and stores the state.
 
 integer SCREEN_FACE = 0;
-string PAGE_URL = "https://YOUR-USERNAME.github.io/jaulistine-smart-home/";
+string PAGE_URL = "https://jaulistine.github.io/jaulistine-smart-home/";
 integer REFRESH_SECONDS = 60;
 
 float indoorTemperature = 72.0;
@@ -104,15 +104,15 @@ handleTouch(float x, float y)
         else if (fanSetting == "ON") fanSetting = "OFF";
         else fanSetting = "AUTO";
     }
-    // Six environment mode buttons along the bottom of the screen.
-    else if (between(y, 0.045, 0.145))
+    // Single time-of-day selector near the lower center.
+    // First tap on selector cycles to the next mode. Popup selection areas
+    // are reserved for future media-to-script bridge validation.
+    else if (between(x, 0.315, 0.685) && between(y, 0.17, 0.27))
     {
-        if (between(x, 0.035, 0.185)) environmentMode = "MORNING";
-        else if (between(x, 0.195, 0.345)) environmentMode = "DAY";
-        else if (between(x, 0.355, 0.505)) environmentMode = "EVENING";
-        else if (between(x, 0.515, 0.665)) environmentMode = "NIGHT";
-        else if (between(x, 0.675, 0.825)) environmentMode = "AWAY";
-        else if (between(x, 0.835, 0.985)) environmentMode = "CUSTOM";
+        if (environmentMode == "MORNING") environmentMode = "DAY";
+        else if (environmentMode == "DAY") environmentMode = "EVENING";
+        else if (environmentMode == "EVENING") environmentMode = "NIGHT";
+        else environmentMode = "MORNING";
     }
     refreshScreen();
 }
