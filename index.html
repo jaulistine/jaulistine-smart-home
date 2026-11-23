@@ -3,91 +3,138 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
 <title>Jaulistine | Smart Home</title>
 <style>
-:root{--bg:#101216;--panel:#1a1e24;--panel2:#20252d;--line:#343b45;--text:#f3f1ec;--muted:#a3a8ad;--gold:#c6ad83;--gold2:#e0cfad;--green:#9fc7a9;--red:#d89b91}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-body{background:radial-gradient(ellipse at 78% 8%,#30323a 0,#171a20 38%,#101216 78%)}
-.screen{width:1280px;height:800px;margin:auto;padding:38px 48px;position:relative}
-.top{height:74px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:20px}
-.brand{font-size:27px;letter-spacing:5px;font-weight:500}.brand span{color:var(--gold)}
-.sub{font-size:11px;letter-spacing:3px;color:var(--muted);margin-top:8px}
-.status{font-size:11px;letter-spacing:2px;color:var(--green);border:1px solid #46574b;padding:10px 15px;border-radius:20px}
-.main{display:grid;grid-template-columns:1.05fr 1fr;gap:24px;margin-top:25px;height:430px}
-.panel{background:linear-gradient(145deg,rgba(35,40,48,.96),rgba(23,27,33,.96));border:1px solid var(--line);border-radius:18px;padding:27px 30px;box-shadow:0 18px 40px #0005}
-.kicker{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
-.temp{font-size:112px;line-height:1;font-weight:300;letter-spacing:-5px;margin:18px 0 4px}
-.temp small{font-size:43px;letter-spacing:0;color:var(--gold2);vertical-align:top;margin-left:7px}
-.caption{font-size:13px;color:var(--muted);letter-spacing:1px}
-.targetrow{display:flex;align-items:center;justify-content:space-between;margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}
-.target{font-size:30px;color:var(--gold2);margin-top:7px}
+:root{
+ --ink:#f5f3ef;--muted:#a7adb5;--gold:#d6bd91;--gold-hi:#f1dfbb;
+ --glass:rgba(255,255,255,.075);--edge:rgba(255,255,255,.19);
+ --shadow:rgba(0,0,0,.52);--green:#a8d2b2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b0f;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif}
+body{
+ background:
+ radial-gradient(ellipse at 16% 0%,rgba(116,126,143,.22),transparent 37%),
+ radial-gradient(ellipse at 90% 95%,rgba(177,145,102,.13),transparent 38%),
+ linear-gradient(135deg,#0b0d11 0%,#191d24 48%,#0b0d11 100%);
+}
+.screen{width:1280px;height:800px;margin:0 auto;padding:43px 54px;position:relative;overflow:hidden}
+.screen:before{content:"";position:absolute;inset:13px;border:1px solid rgba(255,255,255,.12);border-radius:27px;pointer-events:none;box-shadow:inset 0 1px 1px rgba(255,255,255,.09),0 18px 70px #0008}
+.screen:after{content:"";position:absolute;inset:15px;border-radius:26px;pointer-events:none;background:linear-gradient(128deg,rgba(255,255,255,.10),transparent 18%,transparent 67%,rgba(255,255,255,.035));mix-blend-mode:screen}
+.top{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.13);padding:0 7px 19px;position:relative;z-index:1}
+.brand{font-size:28px;letter-spacing:6px;font-weight:400}
+.brand span{color:var(--gold)}
+.sub{font-size:10px;letter-spacing:3.2px;color:#aeb4bd;margin-top:8px}
+.status{font-size:10px;letter-spacing:2px;color:var(--green);padding:10px 15px;border:1px solid rgba(168,210,178,.27);border-radius:30px;background:rgba(168,210,178,.055);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.main{display:grid;grid-template-columns:1.04fr .96fr;gap:23px;margin-top:31px;height:455px;position:relative;z-index:1}
+.panel{
+ position:relative;overflow:hidden;border:1px solid var(--edge);border-radius:23px;
+ background:linear-gradient(145deg,rgba(255,255,255,.115),rgba(255,255,255,.035) 43%,rgba(255,255,255,.055));
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.24),inset 0 -1px 1px rgba(0,0,0,.25),0 22px 45px var(--shadow);
+ backdrop-filter:blur(22px);
+}
+.panel:before{content:"";position:absolute;left:0;right:0;top:0;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.105),transparent);pointer-events:none}
+.temp-panel{padding:34px 37px}
+.kicker{font-size:11px;letter-spacing:3px;color:#b6bbc2;text-transform:uppercase}
+.temp{font-size:120px;line-height:1;font-weight:250;letter-spacing:-7px;margin:31px 0 7px;text-shadow:0 7px 25px #0008}
+.temp small{font-size:42px;letter-spacing:0;color:var(--gold-hi);vertical-align:top;margin:12px 0 0 9px}
+.caption{font-size:11px;color:#9ea5ae;letter-spacing:2.2px}
+.targetrow{display:flex;align-items:center;justify-content:space-between;margin-top:44px;padding-top:25px;border-top:1px solid rgba(255,255,255,.13)}
+.target{font-size:34px;color:var(--gold-hi);margin-top:8px;font-weight:300}
 .controls{display:flex;gap:12px}
-.ctrl{width:62px;height:54px;border:1px solid #8f7d60;border-radius:12px;background:linear-gradient(145deg,#37332c,#24252a);color:var(--gold2);font-size:27px}
-.ctrl:after{content:""}
-.readings{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.tile{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:14px;padding:20px 20px;height:122px}
-.tile .value{font-size:27px;margin-top:14px;color:var(--text)}
+.ctrl{width:59px;height:55px;border:1px solid rgba(220,198,158,.53);border-radius:15px;background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.035));color:var(--gold-hi);font-size:27px;box-shadow:inset 0 1px 1px #ffffff35,0 8px 18px #0005}
+.env-panel{padding:31px 30px}
+.env-title{margin-bottom:21px}
+.readings{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile{
+ min-height:151px;padding:23px 21px;border-radius:17px;
+ border:1px solid rgba(255,255,255,.14);
+ background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.025));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 9px 20px rgba(0,0,0,.18);
+}
+.tile .value{font-size:29px;font-weight:350;margin-top:22px;color:#f1eee8;letter-spacing:.4px}
 .tile .value.good{color:var(--green)}
-.tile .value.gold{color:var(--gold2)}
-.tile .value em{font-size:12px;color:var(--muted);font-style:normal}
-.bottom{margin-top:22px}
-.modehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
-.modehint{font-size:11px;color:var(--muted);letter-spacing:1px}
-.modes{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-.mode{height:76px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#242932,#191d23);color:#c8c9c8;font-size:13px;letter-spacing:.7px}
-.mode.active{border-color:var(--gold);background:linear-gradient(145deg,#494235,#292821);color:var(--gold2);box-shadow:inset 0 0 0 1px #c6ad8333}
-.mode span{display:block;font-size:10px;color:var(--muted);margin-top:7px;letter-spacing:1px}
-.footer{position:absolute;bottom:20px;left:48px;right:48px;display:flex;justify-content:space-between;color:#737a82;font-size:10px;letter-spacing:2px}
-@media(max-width:1280px),(max-height:800px){.screen{transform-origin:top left;}}
+.tile .value.gold{color:var(--gold-hi)}
+.tile .value em{font-size:13px;color:#c4c8cd;font-style:normal;margin-left:3px}
+.mode-wrap{position:relative;z-index:3;margin:26px auto 0;width:470px;text-align:center}
+.mode-label{font-size:10px;letter-spacing:3px;color:#9ea5ae;margin-bottom:10px}
+.mode-button{
+ width:100%;height:67px;border:1px solid rgba(224,202,162,.68);border-radius:17px;
+ color:var(--gold-hi);font-size:15px;letter-spacing:3px;
+ background:linear-gradient(110deg,rgba(255,255,255,.19),rgba(255,255,255,.045) 45%,rgba(214,189,145,.13));
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.32),inset 0 -1px 1px rgba(0,0,0,.35),0 12px 25px #0007;
+ text-shadow:0 1px 8px #0008;cursor:pointer;position:relative;
+}
+.mode-button:after{content:"⌄";font-size:18px;margin-left:16px;color:#e5d2ad}
+.mode-menu{
+ display:none;position:absolute;left:0;right:0;top:76px;padding:9px;gap:8px;
+ grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.2);border-radius:16px;
+ background:rgba(23,27,33,.96);backdrop-filter:blur(20px);box-shadow:0 18px 38px #000b;
+}
+.mode-menu.open{display:grid}
+.mode-option{height:48px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:rgba(255,255,255,.055);color:#e7e3dc;font-size:11px;letter-spacing:1px}
+.mode-option.active{border-color:var(--gold);color:var(--gold-hi);background:rgba(214,189,145,.16)}
+.footer{position:absolute;bottom:24px;left:54px;right:54px;display:flex;justify-content:space-between;color:#707781;font-size:9px;letter-spacing:2.4px;z-index:1}
+button{font-family:inherit;outline:none}
+button:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
 </style>
 </head>
 <body>
 <div class="screen">
-  <header class="top">
-    <div><div class="brand">JAULISTINE<span>.</span></div><div class="sub">SMART HOME CONTROL</div></div>
-    <div class="status">● SYSTEM ONLINE</div>
-  </header>
-  <main class="main">
-    <section class="panel">
-      <div class="kicker">Indoor temperature</div>
-      <div class="temp"><span id="indoor">72.0</span><small>°F</small></div>
-      <div class="caption">CURRENT ROOM TEMPERATURE</div>
-      <div class="targetrow">
-        <div><div class="kicker">Desired temperature</div><div class="target"><span id="target">72</span>°F</div></div>
-        <div class="controls"><button class="ctrl" aria-label="Decrease temperature">−</button><button class="ctrl" aria-label="Increase temperature">+</button></div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="kicker" style="margin-bottom:17px">Environment</div>
-      <div class="readings">
-        <div class="tile"><div class="kicker">Humidity</div><div class="value gold"><span id="humidity">48</span><em>%</em></div></div>
-        <div class="tile"><div class="kicker">Air quality</div><div class="value good" id="air">GOOD</div></div>
-        <div class="tile"><div class="kicker">Weather</div><div class="value gold" id="weather">SUNNY</div></div>
-        <div class="tile"><div class="kicker">Fan setting</div><div class="value" id="fan">AUTO</div></div>
-      </div>
-    </section>
-  </main>
-  <section class="bottom">
-    <div class="modehead"><div class="kicker">Environment mode</div><div class="modehint">MANUAL CONTROL · NO AUTOMATIC SCHEDULE</div></div>
-    <div class="modes">
-      <button class="mode">MORNING<span>MODE 01</span></button>
-      <button class="mode active">DAY<span>MODE 02</span></button>
-      <button class="mode">EVENING<span>MODE 03</span></button>
-      <button class="mode">NIGHT<span>MODE 04</span></button>
-      <button class="mode">AWAY<span>MODE 05</span></button>
-      <button class="mode">CUSTOM<span>MODE 06</span></button>
-    </div>
+ <header class="top">
+  <div><div class="brand">JAULISTINE<span>.</span></div><div class="sub">SMART HOME CONTROL</div></div>
+  <div class="status">● SYSTEM ONLINE</div>
+ </header>
+ <main class="main">
+  <section class="panel temp-panel">
+   <div class="kicker">Indoor temperature</div>
+   <div class="temp"><span id="indoor">72.0</span><small>°F</small></div>
+   <div class="caption">CURRENT ROOM TEMPERATURE</div>
+   <div class="targetrow">
+    <div><div class="kicker">Desired temperature</div><div class="target"><span id="target">72</span>°F</div></div>
+    <div class="controls"><button class="ctrl" aria-label="Decrease temperature">−</button><button class="ctrl" aria-label="Increase temperature">+</button></div>
+   </div>
   </section>
-  <footer class="footer"><span>JAULISTINE HOME SYSTEMS</span><span>DESIGNED FOR YOUR SPACE</span></footer>
+  <section class="panel env-panel">
+   <div class="kicker env-title">Home environment</div>
+   <div class="readings">
+    <div class="tile"><div class="kicker">Humidity</div><div class="value gold"><span id="humidity">48</span><em>%</em></div></div>
+    <div class="tile"><div class="kicker">Air quality</div><div class="value good" id="air">GOOD</div></div>
+    <div class="tile"><div class="kicker">Weather</div><div class="value gold" id="weather">SUNNY</div></div>
+    <div class="tile"><div class="kicker">Fan</div><div class="value" id="fan">AUTO</div></div>
+   </div>
+  </section>
+ </main>
+ <section class="mode-wrap">
+  <div class="mode-label">TIME OF DAY</div>
+  <button class="mode-button" id="modeButton" aria-expanded="false">DAY</button>
+  <div class="mode-menu" id="modeMenu">
+   <button class="mode-option" data-mode="MORNING">MORNING</button>
+   <button class="mode-option active" data-mode="DAY">DAY</button>
+   <button class="mode-option" data-mode="EVENING">EVENING</button>
+   <button class="mode-option" data-mode="NIGHT">NIGHT</button>
+  </div>
+ </section>
+ <footer class="footer"><span>JAULISTINE HOME SYSTEMS</span><span>REFINED CONTROL. YOUR WAY.</span></footer>
 </div>
 <script>
-/* The LSL controller supplies the display state in the page URL.
-   Screen actions are handled by touching the matching regions on the prim. */
 const q=new URLSearchParams(location.search);
 const set=(id,key,fallback)=>{const e=document.getElementById(id);if(e)e.textContent=q.get(key)??fallback};
 set("indoor","indoor","72.0");set("target","target","72");set("humidity","humidity","48");
 set("air","air","GOOD");set("weather","weather","SUNNY");set("fan","fan","AUTO");
-const mode=(q.get("mode")||"DAY").toUpperCase();
-document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.textContent.trim().split("\n")[0]===mode));
+let mode=(q.get("mode")||"DAY").toUpperCase();
+const button=document.getElementById("modeButton"), menu=document.getElementById("modeMenu");
+function setMode(next){
+ mode=next;button.textContent=mode;
+ document.querySelectorAll(".mode-option").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+ menu.classList.remove("open");button.setAttribute("aria-expanded","false");
+}
+setMode(["MORNING","DAY","EVENING","NIGHT"].includes(mode)?mode:"DAY");
+button.addEventListener("click",()=>{
+ const open=menu.classList.toggle("open");button.setAttribute("aria-expanded",String(open));
+});
+document.querySelectorAll(".mode-option").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+document.addEventListener("click",e=>{if(!e.target.closest(".mode-wrap")){menu.classList.remove("open");button.setAttribute("aria-expanded","false")}});
 </script>
 </body></html>
