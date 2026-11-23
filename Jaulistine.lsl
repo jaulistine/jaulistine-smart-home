@@ -1,15 +1,12 @@
 // JAULISTINE SMART HOME CONTROLLER
-// New, independent controller. Do not place this in the original thermostat.
-// Place this script in the screen prim. Set SCREEN_FACE and PAGE_URL below.
-//
-// Touch zones are mapped to the 1280x800 design:
-// temperature -/+ buttons, environment tiles, and six mode buttons.
-// The HTML is a display surface; the LSL script owns and stores the state.
+// Place this script in the cube prim that displays the webpage on Face 1.
+// It requests a fresh HTTPS HTTP-in URL and passes it to the webpage.
+// The page sends simple GET beacon commands; no CORS response headers are needed.
 
-integer SCREEN_FACE = 0;
+integer SCREEN_FACE = 1;
 string PAGE_URL = "https://jaulistine.github.io/jaulistine-smart-home/";
-integer REFRESH_SECONDS = 60;
 
+string bridgeURL = "";
 float indoorTemperature = 72.0;
 integer targetTemperature = 72;
 integer humidity = 48;
@@ -18,15 +15,16 @@ string weatherState = "SUNNY";
 string fanSetting = "AUTO";
 string environmentMode = "DAY";
 
-integer lastTick;
-integer mediaReady = FALSE;
+string enc(string value)
+{
+    return llEscapeURL(value);
+}
 
-string enc(string s) { return llEscapeURL(s); }
-
-string makeURL()
+string displayURL()
 {
     return PAGE_URL
-        + "?indoor=" + enc((string)indoorTemperature)
+        + "?bridge=" + enc(bridgeURL)
+        + "&indoor=" + enc((string)indoorTemperature)
         + "&target=" + (string)targetTemperature
         + "&humidity=" + (string)humidity
         + "&air=" + enc(airQuality)
@@ -35,96 +33,80 @@ string makeURL()
         + "&mode=" + enc(environmentMode);
 }
 
-refreshScreen()
+updateScreen()
 {
-    // Updating CURRENT_URL reloads the display with the controller's latest state.
-    llSetPrimMediaParams(SCREEN_FACE, [
-        PRIM_MEDIA_CURRENT_URL, makeURL()
-    ]);
-}
-
-setMedia()
-{
-    llSetPrimMediaParams(SCREEN_FACE, [
+    if (bridgeURL == "") return;
+    integer result = llSetPrimMediaParams(SCREEN_FACE, [
         PRIM_MEDIA_AUTO_PLAY, TRUE,
         PRIM_MEDIA_AUTO_SCALE, TRUE,
         PRIM_MEDIA_CONTROLS, PRIM_MEDIA_CONTROLS_MINI,
-        PRIM_MEDIA_CURRENT_URL, makeURL(),
+        PRIM_MEDIA_WIDTH_PIXELS, 1280,
+        PRIM_MEDIA_HEIGHT_PIXELS, 800,
+        PRIM_MEDIA_CURRENT_URL, displayURL(),
         PRIM_MEDIA_HOME_URL, PAGE_URL,
-        PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_ANYONE,
+        PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_OWNER,
         PRIM_MEDIA_PERMS_CONTROL, PRIM_MEDIA_PERM_OWNER
     ]);
-    mediaReady = TRUE;
+    if (result != STATUS_OK)
+        llOwnerSay("Jaulistine: Media update returned status " + (string)result);
 }
 
-integer between(float v, float low, float high)
+string queryValue(string query, string wanted)
 {
-    return (v >= low && v <= high);
+    list pairs = llParseStringKeepNulls(query, ["&"], []);
+    integer i;
+    for (i = 0; i < llGetListLength(pairs); ++i)
+    {
+        string pair = llList2String(pairs, i);
+        integer splitAt = llSubStringIndex(pair, "=");
+        if (splitAt >= 0)
+        {
+            string keyName = llUnescapeURL(llGetSubString(pair, 0, splitAt - 1));
+            if (keyName == wanted)
+                return llUnescapeURL(llGetSubString(pair, splitAt + 1, -1));
+        }
+    }
+    return "";
 }
 
-handleTouch(float x, float y)
+integer isOneOf(string value, list choices)
 {
-    // Touch ST coordinates use 0..1, origin at the lower-left.
-    // Main temperature +/- controls are at the right side of the left panel.
-    if (between(x, 0.365, 0.425) && between(y, 0.485, 0.565))
+    return (llListFindList(choices, [value]) != -1);
+}
+
+applyCommand(string cmd, string value)
+{
+    if (cmd == "target")
     {
-        targetTemperature = targetTemperature - 1;
-        if (targetTemperature < 50) targetTemperature = 50;
+        integer v = (integer)value;
+        if (v < 50) v = 50;
+        if (v > 90) v = 90;
+        targetTemperature = v;
     }
-    else if (between(x, 0.435, 0.495) && between(y, 0.485, 0.565))
+    else if (cmd == "humidity")
     {
-        targetTemperature = targetTemperature + 1;
-        if (targetTemperature > 90) targetTemperature = 90;
+        integer h = (integer)value;
+        if (h < 30) h = 30;
+        if (h > 70) h = 70;
+        humidity = h;
     }
-    // Environment tiles: humidity, air, weather, fan.
-    else if (between(x, 0.535, 0.745) && between(y, 0.615, 0.785))
-    {
-        humidity = humidity + 5;
-        if (humidity > 70) humidity = 30;
-    }
-    else if (between(x, 0.755, 0.965) && between(y, 0.615, 0.785))
-    {
-        if (airQuality == "GOOD") airQuality = "MODERATE";
-        else if (airQuality == "MODERATE") airQuality = "POOR";
-        else if (airQuality == "POOR") airQuality = "UNHEALTHY";
-        else airQuality = "GOOD";
-    }
-    else if (between(x, 0.535, 0.745) && between(y, 0.445, 0.605))
-    {
-        if (weatherState == "SUNNY") weatherState = "CLOUDY";
-        else if (weatherState == "CLOUDY") weatherState = "RAINY";
-        else if (weatherState == "RAINY") weatherState = "WINDY";
-        else if (weatherState == "WINDY") weatherState = "FOGGY";
-        else if (weatherState == "FOGGY") weatherState = "SNOWY";
-        else weatherState = "SUNNY";
-    }
-    else if (between(x, 0.755, 0.965) && between(y, 0.445, 0.605))
-    {
-        if (fanSetting == "AUTO") fanSetting = "ON";
-        else if (fanSetting == "ON") fanSetting = "OFF";
-        else fanSetting = "AUTO";
-    }
-    // Single time-of-day selector near the lower center.
-    // First tap on selector cycles to the next mode. Popup selection areas
-    // are reserved for future media-to-script bridge validation.
-    else if (between(x, 0.315, 0.685) && between(y, 0.17, 0.27))
-    {
-        if (environmentMode == "MORNING") environmentMode = "DAY";
-        else if (environmentMode == "DAY") environmentMode = "EVENING";
-        else if (environmentMode == "EVENING") environmentMode = "NIGHT";
-        else environmentMode = "MORNING";
-    }
-    refreshScreen();
+    else if (cmd == "air" && isOneOf(value, ["GOOD", "MODERATE", "POOR", "UNHEALTHY"]))
+        airQuality = value;
+    else if (cmd == "weather" && isOneOf(value, ["SUNNY", "CLOUDY", "RAINY", "WINDY", "FOGGY", "SNOWY"]))
+        weatherState = value;
+    else if (cmd == "fan" && isOneOf(value, ["AUTO", "ON", "OFF"]))
+        fanSetting = value;
+    else if (cmd == "mode" && isOneOf(value, ["MORNING", "DAY", "EVENING", "NIGHT"]))
+        environmentMode = value;
 }
 
 default
 {
     state_entry()
     {
-        lastTick = llGetUnixTime();
-        setMedia();
+        llOwnerSay("Jaulistine: requesting secure touchscreen connection...");
+        llRequestSecureURL();
         llSetTimerEvent(60.0);
-        llOwnerSay("Jaulistine Smart Home controller started. Touch the screen to change settings.");
     }
 
     on_rez(integer start_param)
@@ -134,22 +116,51 @@ default
 
     changed(integer change)
     {
-        if (change & CHANGED_OWNER) llResetScript();
+        if (change & (CHANGED_OWNER | CHANGED_REGION_START))
+            llResetScript();
     }
 
-    touch_start(integer total_number)
+    http_request(key request_id, string method, string body)
     {
-        integer face = llDetectedTouchFace(0);
-        vector st = llDetectedTouchST(0);
-        if (face == SCREEN_FACE && st != TOUCH_INVALID_TEXCOORD)
+        if (method == URL_REQUEST_GRANTED)
         {
-            handleTouch(st.x, st.y);
+            bridgeURL = body;
+            if (bridgeURL == "")
+                llOwnerSay("Jaulistine: Second Life did not grant an HTTPS connection URL.");
+            else
+            {
+                llOwnerSay("Jaulistine: secure connection ready.");
+                updateScreen();
+            }
+        }
+        else if (method == URL_REQUEST_DENIED)
+        {
+            llOwnerSay("Jaulistine: unable to obtain an HTTP-in URL. Check script permissions and available URLs.");
+        }
+        else if (method == "GET")
+        {
+            string query = llGetHTTPHeader(request_id, "x-query-string");
+            string cmd = queryValue(query, "cmd");
+            string value = queryValue(query, "value");
+
+            if (cmd != "")
+            {
+                applyCommand(cmd, value);
+                llHTTPResponse(request_id, 200, "OK");
+                updateScreen();
+            }
+            else
+                llHTTPResponse(request_id, 400, "Missing command");
+        }
+        else
+        {
+            llHTTPResponse(request_id, 405, "Method not allowed");
         }
     }
 
     timer()
     {
-        // Gradual room-temperature movement: 0.1°F per minute toward the setpoint.
+        // Simulated room temperature moves 0.1°F per minute toward the target.
         if (indoorTemperature < (float)targetTemperature)
         {
             indoorTemperature += 0.1;
@@ -163,6 +174,6 @@ default
                 indoorTemperature = (float)targetTemperature;
         }
         indoorTemperature = (float)llRound(indoorTemperature * 10.0) / 10.0;
-        refreshScreen();
+        updateScreen();
     }
 }
